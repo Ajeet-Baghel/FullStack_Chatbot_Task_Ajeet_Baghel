@@ -38,16 +38,33 @@
   display: flex;
   gap: 1.5rem;
   list-style: none;
+  align-items: center;
 }
 
-.nav-links a {
+.nav-link {
+  background: transparent;
+  border: none;
+  font: inherit;
   text-decoration: none;
   color: var(--text);
   font-weight: 500;
+  cursor: pointer;
 }
 
-.nav-links a:hover {
+.nav-link:hover {
   color: var(--primary);
+}
+
+.admin-link {
+  background: var(--primary);
+  color: #fff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.4rem;
+}
+
+.admin-link:hover {
+  background: var(--primary-dark);
+  color: #fff;
 }
 
 .hero {

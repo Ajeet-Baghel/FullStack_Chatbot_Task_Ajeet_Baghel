@@ -1,0 +1,201 @@
+.admin {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.admin-header h2 {
+  color: var(--primary);
+}
+
+.admin-toolbar {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.admin-search {
+  flex: 1;
+  min-width: 220px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.4rem;
+}
+
+.admin-toolbar select {
+  padding: 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.4rem;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-table th {
+  background: var(--primary);
+  color: #fff;
+}
+
+.admin-row {
+  cursor: pointer;
+}
+
+.admin-row:hover {
+  background: #f0fdfa;
+}
+
+.admin-empty,
+.admin-loading,
+.admin-error {
+  padding: 1rem 0;
+  color: var(--muted);
+}
+
+.admin-error {
+  color: var(--error);
+}
+
+.admin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.admin-modal {
+  background: #fff;
+  border-radius: 0.75rem;
+  max-width: 520px;
+  width: 100%;
+  padding: 1.5rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.admin-modal h3 {
+  margin-bottom: 1rem;
+  color: var(--primary);
+}
+
+.admin-detail p {
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.admin-status-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.admin-status-form select {
+  padding: 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.4rem;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.btn.danger {
+  background: var(--error);
+}
+
+.btn.danger:hover {
+  background: #b91c1c;
+}
+
+.admin-login {
+  max-width: 360px;
+  margin: 4rem auto;
+  text-align: center;
+}
+
+.admin-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.admin-login-form input {
+  padding: 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+}
+
+.admin-login-error {
+  color: var(--error);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 720px) {
+  .admin-table,
+  .admin-table thead,
+  .admin-table tbody,
+  .admin-table th,
+  .admin-table td,
+  .admin-table tr {
+    display: block;
+  }
+
+  .admin-table thead {
+    display: none;
+  }
+
+  .admin-table tr {
+    margin-bottom: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .admin-table td {
+    border: none;
+    position: relative;
+    padding-left: 40%;
+  }
+
+  .admin-table td::before {
+    position: absolute;
+    left: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  .admin-table td:nth-of-type(1)::before { content: 'ID'; }
+  .admin-table td:nth-of-type(2)::before { content: 'Name'; }
+  .admin-table td:nth-of-type(3)::before { content: 'Email'; }
+  .admin-table td:nth-of-type(4)::before { content: 'Type'; }
+  .admin-table td:nth-of-type(5)::before { content: 'Interest'; }
+  .admin-table td:nth-of-type(6)::before { content: 'Status'; }
+  .admin-table td:nth-of-type(7)::before { content: 'Created'; }
+}
