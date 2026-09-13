@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import { testConnection } from './db.js'
+import enquiryRoutes from './routes/enquiries.js'
 
 dotenv.config()
 
@@ -10,6 +11,8 @@ const PORT = process.env.PORT || 5000
 
 app.use(cors())
 app.use(express.json())
+
+app.use('/api/enquiries', enquiryRoutes)
 
 app.get('/api/health', async (_req, res) => {
   try {
