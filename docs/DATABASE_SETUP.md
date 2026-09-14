@@ -20,17 +20,7 @@ Using `psql`:
 CREATE DATABASE dronetv;
 ```
 
-### 2. Apply the schema
-
-Run this command from the project root:
-
-```bash
-psql -U postgres -d dronetv -f server/src/schema.sql
-```
-
-Enter your PostgreSQL password when prompted.
-
-### 3. Configure the backend
+### 2. Configure the backend
 
 Create `server/.env` from `server/.env.example` and set:
 
@@ -44,6 +34,40 @@ PGSSL=false
 ```
 
 Do not commit `server/.env`.
+
+## Automatic Schema Initialization
+
+The backend automatically connects to PostgreSQL and applies `server/src/schema.sql` before starting the HTTP server. Because the schema uses `CREATE TABLE IF NOT EXISTS`, startup safely creates a missing `enquiries` table without deleting or duplicating existing data.
+
+The manual `psql` and pgAdmin methods below remain available for inspection, verification, or recovery.
+
+### 2. Apply the schema manually (optional)
+
+Run this command from the project root:
+
+```bash
+psql -U postgres -d dronetv -f server/src/schema.sql
+```
+
+Enter your PostgreSQL password when prompted.
+
+### 3. Apply the schema manually with `psql` (optional)
+
+Copy the External Database URL from Render and run:
+
+```bash
+psql "your_render_external_database_url" -f server/src/schema.sql
+```
+
+Use the External Database URL only when connecting from your computer.
+
+### 4. Apply the schema manually with pgAdmin (optional)
+
+1. Register a new server in pgAdmin.
+2. Enter the external hostname, port, database, username, and password supplied by Render.
+3. Set SSL mode to `Require`.
+4. Open **Query Tool** for the database.
+5. Open `server/src/schema.sql`, copy its contents, and execute the query.
 
 ## Render PostgreSQL Setup
 
@@ -64,24 +88,6 @@ PGSSL=true
 ```
 
 Use the Internal Database URL for communication between services on Render. Never commit or publicly share the URL because it contains credentials.
-
-### 3. Apply the schema with `psql`
-
-Copy the External Database URL from Render and run:
-
-```bash
-psql "your_render_external_database_url" -f server/src/schema.sql
-```
-
-Use the External Database URL only when connecting from your computer.
-
-### 4. Apply the schema with pgAdmin
-
-1. Register a new server in pgAdmin.
-2. Enter the external hostname, port, database, username, and password supplied by Render.
-3. Set SSL mode to `Require`.
-4. Open **Query Tool** for the database.
-5. Open `server/src/schema.sql`, copy its contents, and execute the query.
 
 ## Schema
 

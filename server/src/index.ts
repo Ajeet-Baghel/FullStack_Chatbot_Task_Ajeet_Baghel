@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
-import { testConnection } from './db.js'
+import { initializeDatabase, testConnection } from './db.js'
 import adminRoutes from './routes/admin.js'
 import enquiryRoutes from './routes/enquiries.js'
 
@@ -38,6 +38,17 @@ app.get('/api/health', async (_req, res) => {
   }
 })
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`)
-})
+const startServer = async () => {
+  try {
+    await testConnection()
+    await initializeDatabase()
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`)
+    })
+  } catch (err) {
+    console.error('Server startup failed:', err)
+    process.exit(1)
+  }
+}
+
+void startServer()

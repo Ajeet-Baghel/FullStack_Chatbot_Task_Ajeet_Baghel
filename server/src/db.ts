@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises'
 import pg from 'pg'
 import dotenv from 'dotenv'
 
@@ -14,15 +15,23 @@ const pool = new Pool({
   ssl: process.env.PGSSL === 'true' ? { rejectUnauthorized: false } : undefined
 })
 
+export async function initializeDatabase(): Promise<void> {
+  const schemaUrl = new URL('../src/schema.sql', import.meta.url)
+  const schema = await readFile(schemaUrl, 'utf8')
+  await pool.query(schema)
+  console.log('PostgreSQL schema initialized')
+}
+
 export async function testConnection(): Promise<void> {
+  const client = await pool.connect()
   try {
-    const client = await pool.connect()
     const res = await client.query('SELECT NOW()')
     console.log('PostgreSQL connected:', res.rows[0].now)
-    client.release()
   } catch (err) {
-    console.error('PostgreSQL connection failed:', (err as Error).message)
+    console.error('PostgreSQL connection failed:', err)
     throw err
+  } finally {
+    client.release()
   }
 }
 
