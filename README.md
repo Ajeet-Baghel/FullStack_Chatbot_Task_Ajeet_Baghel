@@ -111,13 +111,13 @@ ADMIN_PASSWORD_HASH=your_salt:your_scrypt_hash
 SESSION_SECRET=replace_with_a_long_random_secret
 ```
 
-For a separately hosted frontend, configure:
+For a separately hosted frontend that does not use the included Vercel rewrite, configure:
 
 ```env
 VITE_API_URL=https://your-backend.example.com
 ```
 
-`DATABASE_URL` can replace the individual `PG*` connection fields on managed PostgreSQL. Set `PGSSL=true` when required by the provider. Never commit `.env` files, password hashes, session secrets, or database credentials.
+The included `client/vercel.json` proxies `/api` to the Render backend so production authentication cookies remain first-party. Leave `VITE_API_URL` unset on Vercel when using this rewrite.
 
 ## API Endpoints
 

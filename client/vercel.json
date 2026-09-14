@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://fullstack-chatbot-task-ajeet-baghel.onrender.com/api/:path*"
+    }
+  ]
+}
