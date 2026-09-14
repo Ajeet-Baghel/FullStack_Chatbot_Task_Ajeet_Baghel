@@ -1,4 +1,6 @@
 import { useState, FormEvent } from 'react'
+import { services } from './Services'
+import { courses } from './Courses'
 
 type FormData = {
   name: string
@@ -35,15 +37,36 @@ function ContactForm() {
     return ''
   }
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     const error = validate(form)
     if (error) {
       setStatus({ type: 'error', text: error })
       return
     }
-    setStatus({ type: 'success', text: 'Enquiry submitted successfully. We will contact you soon.' })
-    setForm(initial)
+
+    setStatus(null)
+    try {
+      const response = await fetch('/api/enquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          user_type: form.userType,
+          interest: form.interest,
+          message: form.message
+        })
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.message || 'Unable to submit enquiry.')
+
+      setStatus({ type: 'success', text: 'Enquiry submitted successfully. We will contact you soon.' })
+      setForm(initial)
+    } catch (err) {
+      setStatus({ type: 'error', text: (err as Error).message })
+    }
   }
 
   return (
@@ -76,12 +99,23 @@ function ContactForm() {
           <option>Customer</option>
           <option>Other</option>
         </select>
-        <input
-          type="text"
-          placeholder="Service or course of interest"
+        <select
           value={form.interest}
           onChange={e => setForm({ ...form, interest: e.target.value })}
-        />
+          aria-label="Service or course of interest"
+        >
+          <option value="" disabled>Select a service or course of interest</option>
+          <optgroup label="Services">
+            {services.map(service => (
+              <option key={service.title} value={service.title}>{service.title}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Courses & Training">
+            {courses.map(course => (
+              <option key={course.title} value={course.title}>{course.title}</option>
+            ))}
+          </optgroup>
+        </select>
         <textarea
           placeholder="Message"
           rows={4}

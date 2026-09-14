@@ -1,5 +1,7 @@
-import { useState, FormEvent } from 'react'
+import { useState, useEffect, useRef, FormEvent } from 'react'
 import './Chatbot.css'
+import { services } from './Services'
+import { courses } from './Courses'
 
 type Message = { role: 'user' | 'bot'; text: string }
 
@@ -24,6 +26,15 @@ const questions = [
 
 const getResponse = (input: string): string => {
   const text = input.toLowerCase()
+  if (text.includes('interested in a service')) {
+    return 'Great! Please submit an enquiry and our team will reach out to discuss your requirements.'
+  }
+  if (text.includes('student')) {
+    return 'We have special courses and support for students. Submit an enquiry to learn more.'
+  }
+  if (text.includes('speak') || text.includes('someone')) {
+    return 'Please submit an enquiry, and our team will call you back shortly.'
+  }
   if (text.includes('service') && !text.includes('course')) {
     return 'DroneTV provides aerial photography, land surveying, industrial inspections, and advisory services.'
   }
@@ -36,16 +47,7 @@ const getResponse = (input: string): string => {
   if (text.includes('register') || text.includes('enroll')) {
     return 'You can register for any course by filling out the enquiry form with your details.'
   }
-  if (text.includes('interested in a service')) {
-    return 'Great! Please submit an enquiry and our team will reach out to discuss your requirements.'
-  }
-  if (text.includes('student')) {
-    return 'We have special courses and support for students. Submit an enquiry to learn more.'
-  }
-  if (text.includes('speak') || text.includes('someone')) {
-    return 'Please submit an enquiry, and our team will call you back shortly.'
-  }
-  return "I'm not sure I understood. Try one of the quick questions or submit an enquiry."
+  return "I'm not sure I understood. Try one of the FAQs or submit an enquiry."
 }
 
 const initialEnquiry: Enquiry = {
@@ -64,13 +66,20 @@ function Chatbot() {
   ])
   const [input, setInput] = useState('')
   const [showEnquiry, setShowEnquiry] = useState(false)
+  const [showFaq, setShowFaq] = useState(false)
   const [enquiry, setEnquiry] = useState<Enquiry>(initialEnquiry)
   const [status, setStatus] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
   const addMessage = (msg: Message) => setMessages(prev => [...prev, msg])
 
   const sendMessage = (text: string) => {
     if (!text.trim()) return
+    setShowFaq(false)
     addMessage({ role: 'user', text })
     const reply = getResponse(text)
     setTimeout(() => addMessage({ role: 'bot', text: reply }), 300)
@@ -85,6 +94,7 @@ function Chatbot() {
   const handleReset = () => {
     setMessages([{ role: 'bot', text: 'Hi! How can I help you today? Ask a question or choose one below.' }])
     setShowEnquiry(false)
+    setShowFaq(false)
     setStatus(null)
   }
 
@@ -101,17 +111,37 @@ function Chatbot() {
     return ''
   }
 
-  const submitEnquiry = (e: FormEvent) => {
+  const submitEnquiry = async (e: FormEvent) => {
     e.preventDefault()
     const error = validateEnquiry(enquiry)
     if (error) {
       setStatus({ type: 'error', text: error })
       return
     }
-    setStatus({ type: 'success', text: 'Enquiry submitted successfully.' })
-    addMessage({ role: 'bot', text: `Thanks ${enquiry.name}, we have received your enquiry and will contact you soon.` })
-    setEnquiry(initialEnquiry)
-    setShowEnquiry(false)
+
+    setStatus(null)
+    try {
+      const response = await fetch('/api/enquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: enquiry.name,
+          email: enquiry.email,
+          phone: enquiry.phone,
+          user_type: enquiry.userType,
+          interest: enquiry.interest,
+          message: enquiry.message
+        })
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.message || 'Unable to submit enquiry.')
+
+      addMessage({ role: 'bot', text: `Thanks ${enquiry.name}, we have received your enquiry and will contact you soon.` })
+      setEnquiry(initialEnquiry)
+      setShowEnquiry(false)
+    } catch (err) {
+      setStatus({ type: 'error', text: (err as Error).message })
+    }
   }
 
   return (
@@ -126,12 +156,13 @@ function Chatbot() {
             </div>
           </div>
 
-          <div className="chatbot-messages">
+          <div className="chatbot-messages" aria-live="polite">
             {messages.map((msg, i) => (
               <div key={i} className={`chatbot-bubble ${msg.role}`}>
                 {msg.text}
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
 
           {showEnquiry ? (
@@ -162,12 +193,23 @@ function Chatbot() {
                 <option>Customer</option>
                 <option>Other</option>
               </select>
-              <input
-                type="text"
-                placeholder="Service or course of interest"
+              <select
                 value={enquiry.interest}
                 onChange={e => setEnquiry({ ...enquiry, interest: e.target.value })}
-              />
+                aria-label="Service or course of interest"
+              >
+                <option value="" disabled>Select a service or course</option>
+                <optgroup label="Services">
+                  {services.map(service => (
+                    <option key={service.title} value={service.title}>{service.title}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Courses & Training">
+                  {courses.map(course => (
+                    <option key={course.title} value={course.title}>{course.title}</option>
+                  ))}
+                </optgroup>
+              </select>
               <textarea
                 placeholder="Message"
                 rows={2}
@@ -181,14 +223,26 @@ function Chatbot() {
               {status && <p className={`status ${status.type}`}>{status.text}</p>}
             </form>
           ) : (
-            <>
-              <div className="chatbot-questions">
-                {questions.map((q, i) => (
-                  <button key={i} onClick={() => sendMessage(q)} className="question-btn">
-                    {q}
-                  </button>
-                ))}
-              </div>
+            <div className="chatbot-controls">
+              <button
+                type="button"
+                onClick={() => setShowFaq(current => !current)}
+                className="faq-toggle"
+                aria-expanded={showFaq}
+                aria-controls="chatbot-faq-list"
+              >
+                FAQs
+                <span aria-hidden="true">{showFaq ? '−' : '+'}</span>
+              </button>
+              {showFaq && (
+                <div id="chatbot-faq-list" className="chatbot-questions">
+                  {questions.map((q, i) => (
+                    <button key={i} type="button" onClick={() => sendMessage(q)} className="question-btn">
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              )}
               <form className="chatbot-input" onSubmit={handleSend}>
                 <input
                   type="text"
@@ -198,10 +252,10 @@ function Chatbot() {
                 />
                 <button type="submit" className="btn small">Send</button>
               </form>
-              <button onClick={() => { setShowEnquiry(true); setStatus(null) }} className="enquiry-toggle">
+              <button onClick={() => { setShowEnquiry(true); setShowFaq(false); setStatus(null) }} className="enquiry-toggle">
                 I want to submit an enquiry
               </button>
-            </>
+            </div>
           )}
         </div>
       )}

@@ -1,4 +1,4 @@
-const services = [
+export const services = [
   { title: 'Aerial Photography', desc: 'High-quality drone photo and video for events, real estate, and promotions.' },
   { title: 'Land Surveying', desc: 'Accurate drone-based mapping and topographic surveys for projects of any size.' },
   { title: 'Industrial Inspections', desc: 'Safe, detailed inspections of towers, roofs, and industrial structures.' },

@@ -1,4 +1,4 @@
-const courses = [
+export const courses = [
   { title: 'Basic Drone Piloting', desc: 'Hands-on training for beginners to master controls and safety protocols.' },
   { title: 'Aerial Photography Masterclass', desc: 'Shoot, edit, and deliver cinematic drone content for clients.' },
   { title: 'Surveying & Mapping', desc: 'Learn photogrammetry, mapping workflows, and data processing.' },
