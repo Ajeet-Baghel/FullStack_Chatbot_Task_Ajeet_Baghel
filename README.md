@@ -98,14 +98,26 @@ Server `server/.env`:
 
 ```env
 PORT=5000
+NODE_ENV=development
+CLIENT_URL=http://localhost:5173
 PGUSER=postgres
 PGHOST=localhost
 PGDATABASE=dronetv
 PGPASSWORD=your_password
 PGPORT=5432
+PGSSL=false
+DATABASE_URL=
+ADMIN_PASSWORD_HASH=your_salt:your_scrypt_hash
+SESSION_SECRET=replace_with_a_long_random_secret
 ```
 
-Never commit `server/.env` or real credentials.
+For a separately hosted frontend, configure:
+
+```env
+VITE_API_URL=https://your-backend.example.com
+```
+
+`DATABASE_URL` can replace the individual `PG*` connection fields on managed PostgreSQL. Set `PGSSL=true` when required by the provider. Never commit `.env` files, password hashes, session secrets, or database credentials.
 
 ## API Endpoints
 
@@ -117,6 +129,9 @@ Never commit `server/.env` or real credentials.
 | PUT | `/api/enquiries/:id` | Update enquiry |
 | DELETE | `/api/enquiries/:id` | Delete an enquiry |
 | GET | `/api/health` | Check API and database health |
+| GET | `/api/admin/session` | Check the current admin session |
+| POST | `/api/admin/login` | Create an HTTP-only admin session |
+| POST | `/api/admin/logout` | Clear the admin session |
 
 ### Enquiry Payload
 
@@ -192,9 +207,9 @@ Before deploying:
 6. Build the client with `npm run build` and the server with `npm run build`.
 7. Verify `/api/health`, enquiry submission, listing, status updates, and deletion.
 
-## Security Note
+## Security
 
-The current admin password check is client-side and is suitable only for demonstration. Before a public production deployment, replace it with server-side authentication, an HTTP-only session cookie, a hashed password, and authorization middleware for enquiry read/update/delete endpoints.
+Admin authentication is handled by the backend. The admin password is stored as a salted scrypt hash, successful login creates a signed HTTP-only cookie, and enquiry read/update/delete endpoints require a valid admin session. Production deployments must use HTTPS and strong values for `ADMIN_PASSWORD_HASH` and `SESSION_SECRET`.
 
 ## Video Walkthrough
 

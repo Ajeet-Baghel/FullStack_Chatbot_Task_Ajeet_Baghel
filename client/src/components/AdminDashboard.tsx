@@ -1,4 +1,5 @@
 import { useEffect, useState, FormEvent } from 'react'
+import { apiFetch } from '../api'
 import './Admin.css'
 
 type Enquiry = {
@@ -17,7 +18,7 @@ type Enquiry = {
 const userTypes = ['All', 'Student', 'Customer', 'Other']
 const statuses = ['New', 'Contacted', 'In Progress', 'Closed']
 
-function AdminDashboard({ onBack }: { onBack: () => void }) {
+function AdminDashboard({ onBack, onLogout }: { onBack: () => void; onLogout: () => void }) {
   const [enquiries, setEnquiries] = useState<Enquiry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -30,7 +31,11 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch('/api/enquiries')
+      const res = await apiFetch('/api/enquiries')
+      if (res.status === 401) {
+        onLogout()
+        return
+      }
       if (!res.ok) throw new Error('Failed to load enquiries')
       const data: Enquiry[] = await res.json()
       setEnquiries(data)
@@ -65,11 +70,15 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
     if (!selected) return
     const body = { ...selected, status: newStatus }
     try {
-      const res = await fetch(`/api/enquiries/${selected.id}`, {
+      const res = await apiFetch(`/api/enquiries/${selected.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       })
+      if (res.status === 401) {
+        onLogout()
+        return
+      }
       if (!res.ok) throw new Error('Update failed')
       setSelected(null)
       await fetchEnquiries()
@@ -81,7 +90,11 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
   const deleteEnquiry = async (id: number) => {
     if (!confirm('Are you sure you want to delete this enquiry?')) return
     try {
-      const res = await fetch(`/api/enquiries/${id}`, { method: 'DELETE' })
+      const res = await apiFetch(`/api/enquiries/${id}`, { method: 'DELETE' })
+      if (res.status === 401) {
+        onLogout()
+        return
+      }
       if (!res.ok) throw new Error('Delete failed')
       setSelected(null)
       await fetchEnquiries()
@@ -94,7 +107,10 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
     <div className="admin">
       <header className="admin-header">
         <h2>Admin Dashboard</h2>
-        <button onClick={onBack} className="btn small">Back to site</button>
+        <div className="admin-actions">
+          <button onClick={onBack} className="btn small">Back to site</button>
+          <button onClick={onLogout} className="btn small secondary">Logout</button>
+        </div>
       </header>
 
       <div className="admin-toolbar">

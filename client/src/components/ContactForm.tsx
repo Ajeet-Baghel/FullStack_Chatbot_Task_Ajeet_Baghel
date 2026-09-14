@@ -1,4 +1,5 @@
 import { useState, FormEvent } from 'react'
+import { apiFetch } from '../api'
 import { services } from './Services'
 import { courses } from './Courses'
 
@@ -47,7 +48,7 @@ function ContactForm() {
 
     setStatus(null)
     try {
-      const response = await fetch('/api/enquiries', {
+      const response = await apiFetch('/api/enquiries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

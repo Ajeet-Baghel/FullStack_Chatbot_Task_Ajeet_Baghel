@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, FormEvent } from 'react'
+import { apiFetch } from '../api'
 import './Chatbot.css'
 import { services } from './Services'
 import { courses } from './Courses'
@@ -121,7 +122,7 @@ function Chatbot() {
 
     setStatus(null)
     try {
-      const response = await fetch('/api/enquiries', {
+      const response = await apiFetch('/api/enquiries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

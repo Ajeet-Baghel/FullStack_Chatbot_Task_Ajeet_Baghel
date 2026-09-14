@@ -5,11 +5,13 @@ const { Pool } = pg
 dotenv.config()
 
 const pool = new Pool({
-  user: process.env.PGUSER,
-  host: process.env.PGHOST,
-  database: process.env.PGDATABASE,
-  password: process.env.PGPASSWORD,
-  port: Number(process.env.PGPORT) || 5432,
+  connectionString: process.env.DATABASE_URL,
+  user: process.env.DATABASE_URL ? undefined : process.env.PGUSER,
+  host: process.env.DATABASE_URL ? undefined : process.env.PGHOST,
+  database: process.env.DATABASE_URL ? undefined : process.env.PGDATABASE,
+  password: process.env.DATABASE_URL ? undefined : process.env.PGPASSWORD,
+  port: process.env.DATABASE_URL ? undefined : Number(process.env.PGPORT) || 5432,
+  ssl: process.env.PGSSL === 'true' ? { rejectUnauthorized: false } : undefined
 })
 
 export async function testConnection(): Promise<void> {

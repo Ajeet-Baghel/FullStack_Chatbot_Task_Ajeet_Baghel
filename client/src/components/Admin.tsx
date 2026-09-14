@@ -1,24 +1,54 @@
-import { useState, FormEvent } from 'react'
+import { useEffect, useState, FormEvent } from 'react'
+import { apiFetch } from '../api'
 import './Admin.css'
 import AdminDashboard from './AdminDashboard'
 
 function Admin({ onBack }: { onBack: () => void }) {
   const [authed, setAuthed] = useState(false)
+  const [checkingSession, setCheckingSession] = useState(true)
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
-  const login = (e: FormEvent) => {
+  useEffect(() => {
+    apiFetch('/api/admin/session')
+      .then(response => response.ok ? response.json() : { authenticated: false })
+      .then(data => setAuthed(Boolean(data.authenticated)))
+      .catch(() => setAuthed(false))
+      .finally(() => setCheckingSession(false))
+  }, [])
+
+  const login = async (e: FormEvent) => {
     e.preventDefault()
-    if (password === 'admin') {
+    setError('')
+    try {
+      const response = await apiFetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.message || 'Unable to sign in')
+      setPassword('')
       setAuthed(true)
-      setError('')
-    } else {
-      setError('Invalid password')
+    } catch (err) {
+      setError((err as Error).message)
     }
   }
 
+  const logout = async () => {
+    try {
+      await apiFetch('/api/admin/logout', { method: 'POST' })
+    } finally {
+      setAuthed(false)
+    }
+  }
+
+  if (checkingSession) {
+    return <div className="admin-login"><p>Checking admin session...</p></div>
+  }
+
   if (authed) {
-    return <AdminDashboard onBack={onBack} />
+    return <AdminDashboard onBack={onBack} onLogout={logout} />
   }
 
   return (

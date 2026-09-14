@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { requireAdmin } from '../auth.js'
 import pool from '../db.js'
 
 const router = Router()
@@ -47,7 +48,7 @@ const validate = (data: any, forUpdate = false): string => {
   return ''
 }
 
-router.get('/', async (_req, res) => {
+router.get('/', requireAdmin, async (_req, res) => {
   try {
     const result = await pool.query('SELECT * FROM enquiries ORDER BY created_at DESC')
     res.json(result.rows.map(toEnquiry))
@@ -57,7 +58,7 @@ router.get('/', async (_req, res) => {
   }
 })
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', requireAdmin, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM enquiries WHERE id = $1', [req.params.id])
     if (!result.rowCount) {
@@ -88,7 +89,7 @@ router.post('/', async (req, res) => {
   }
 })
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireAdmin, async (req, res) => {
   const error = validate(req.body, true)
   if (error) {
     return res.status(400).json({ message: error })
@@ -109,7 +110,7 @@ router.put('/:id', async (req, res) => {
   }
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAdmin, async (req, res) => {
   try {
     const result = await pool.query('DELETE FROM enquiries WHERE id = $1 RETURNING *', [req.params.id])
     if (!result.rowCount) {
