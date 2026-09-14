@@ -9,9 +9,21 @@ dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 5000
-const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173'
+const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
+  .split(',')
+  .map(origin => origin.trim().replace(/\/$/, ''))
+  .filter(Boolean)
 
-app.use(cors({ origin: CLIENT_URL, credentials: true }))
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true)
+      return
+    }
+    callback(new Error('Origin is not allowed by CORS'))
+  },
+  credentials: true
+}))
 app.use(express.json())
 
 app.use('/api/admin', adminRoutes)

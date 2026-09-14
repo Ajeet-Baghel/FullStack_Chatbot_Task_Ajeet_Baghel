@@ -217,7 +217,8 @@ Walkthrough and submission notes are provided in `docs/WALKTHROUGH.md`.
 
 ## Live Demo
 
-Not deployed yet. Add the public frontend and backend URLs here after deployment.
+- Frontend: https://full-stack-chatbot-task-ajeet-baghe.vercel.app
+- Backend health: https://fullstack-chatbot-task-ajeet-baghel.onrender.com/api/health
 
 ## Repository
 
